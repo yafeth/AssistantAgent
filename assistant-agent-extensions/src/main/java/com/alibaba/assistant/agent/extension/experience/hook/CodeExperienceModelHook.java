@@ -79,9 +79,13 @@ public class CodeExperienceModelHook extends ModelHook {
             }
 
             // 检查是否是代码相关请求
-            Optional<Object> messagesOpt = state.value("messages");
+            Optional<Object> messagesOpt = state.value("codeact_node_messages");
             if (messagesOpt.isEmpty()) {
-                return CompletableFuture.completedFuture(Map.of());
+                messagesOpt = state.value("messages");
+                if (messagesOpt.isEmpty()) {
+                    log.warn("CodeExperienceModelHook#beforeModel - reason=state中没有messages，跳过");
+                    return CompletableFuture.completedFuture(Map.of());
+                }
             }
 
             List<Message> messages = (List<Message>) messagesOpt.get();
