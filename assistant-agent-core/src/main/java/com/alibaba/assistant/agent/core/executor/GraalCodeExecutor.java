@@ -1280,7 +1280,11 @@ public class GraalCodeExecutor {
 		code.append(String.format("%s    result_str = str(result_json) if not isinstance(result_json, str) else result_json\n", indent));
 		code.append(String.format("%s    if not result_str or result_str.strip() == '':\n", indent));
 		code.append(String.format("%s        return {}\n", indent));
-		code.append(String.format("%s    return json.loads(result_str)\n", indent));
+		code.append(String.format("%s    # Try to parse as JSON, if not valid JSON return raw string as result\n", indent));
+		code.append(String.format("%s    try:\n", indent));
+		code.append(String.format("%s        return json.loads(result_str)\n", indent));
+		code.append(String.format("%s    except (json.JSONDecodeError, ValueError):\n", indent));
+		code.append(String.format("%s        return result_str\n", indent));
 		code.append("\n");
 	}
 
