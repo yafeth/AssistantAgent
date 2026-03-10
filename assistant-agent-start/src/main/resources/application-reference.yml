@@ -108,14 +108,14 @@ spring.ai.alibaba.codeact.extension.reply:
   tools:
     - toolName: send_message
       channelCode: DEFAULT
-      description: Send a message to the user
+      description: 向用户发送消息
       reactEnabled: true
       codeActEnabled: true
       parameters:
         - name: text
           type: STRING
           required: true
-          description: The message text
+          description: 消息文本
 
 # ============================================================================
 # Evaluation Module

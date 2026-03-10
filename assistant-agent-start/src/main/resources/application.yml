@@ -57,34 +57,34 @@ spring.ai.alibaba.codeact.extension.reply:
   tools:
     - toolName: send_success_message
       channelCode: IDE_TEXT
-      description: Send a success message to the IDE console
+      description: 向 IDE 控制台发送成功消息
       reactEnabled: true
       codeActEnabled: true
       parameters:
         - name: text
           type: STRING
           required: true
-          description: The success message text
+          description: 成功消息的文本
     - toolName: send_error_message
       channelCode: IDE_TEXT
-      description: Send an error message to the IDE console
+      description: 向 IDE 控制台发送错误消息
       reactEnabled: true
       codeActEnabled: true
       parameters:
         - name: text
           type: STRING
           required: true
-          description: The error message text
+          description: 错误消息的文本
     - toolName: send_notification
       channelCode: IDE_TEXT
-      description: Send a notification message
+      description: 发送通知消息
       reactEnabled: true
       codeActEnabled: true
       parameters:
         - name: text
           type: STRING
           required: true
-          description: The notification text
+          description: 通知的文本
 
 # ============================================================================
 # Evaluation Module - with input routing
