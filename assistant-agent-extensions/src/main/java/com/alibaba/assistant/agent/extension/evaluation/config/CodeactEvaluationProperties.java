@@ -43,8 +43,9 @@ public class CodeactEvaluationProperties {
 
 	/**
 	 * 输入路由评估配置
+	 * <p>4.1 重构后：统一使用 default-suite
 	 */
-	private EvaluationPointConfig inputRouting = new EvaluationPointConfig(true, "react-phase-suite");
+	private EvaluationPointConfig inputRouting = new EvaluationPointConfig(true, "default-suite");
 
 	/**
 	 * 模型输出评估配置
