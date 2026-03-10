@@ -283,13 +283,13 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 	 * write_code 工具的详细描述
 	 * 
 	 * <p>包含代码编写规范和指导，帮助 LLM 生成正确的代码。
-	 * 这些内容源自原 CodeGeneratorNode 的 buildSystemPrompt 方法。
+	 * <p>注意：此描述应保持通用，不预设具体的工具方法名，具体可用工具由运行时注入的 CodeactTool 决定。
 	 */
 	private static final String WRITE_CODE_DESCRIPTION = """
 		Register a Python function with the specified name and complete code.
 		
 		REQUIRED PARAMETERS:
-		- functionName: The exact function name (snake_case format, e.g., 'query_app_info')
+		- functionName: The exact function name (snake_case format, e.g., 'calculate_sum')
 		- description: Brief description of what the function does
 		- parameters: List of parameter names the function accepts
 		- code: Complete Python function code including 'def' statement and full implementation
@@ -299,48 +299,43 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 		   - Must start with 'def function_name(params):' matching the functionName parameter
 		   - Include docstring describing the function's purpose
 		   - Handle errors gracefully with try/except blocks
-		   - Return meaningful results or call reply tools to respond to user
+		   - Return meaningful results as a dictionary
 		
-		2. Available Context Variables (pre-injected, use directly without defining):
-		   - input_text: User's original input text
-		   - user_id: Current user ID
-		   - tenant_id: Tenant ID
-		   - session_id: Session ID
-		   - attachments: List of attachments
+		2. Pure Computation Functions:
+		   - For simple calculations or data processing, just return the result
+		   - The agent will handle displaying results to the user after execute_code
+		   - Example: return {"success": True, "result": computed_value}
 		
-		3. Tool Usage in Code:
+		3. Tool Usage (when tools are available):
+		   - Tools are injected at runtime as Python objects
 		   - Use 'tool_class.method_name(args)' format to call tools
-		   - Available tool classes: search_tools, reply_tools, aone_api_tools, llm_tools, etc.
-		   - Example: search_tools.search("keyword") or reply_tools.send_message("response")
+		   - Check available tools in the system prompt or guidance before using them
+		   - Common tool classes: search_tools, reply_tools, trigger_tools, etc.
+		   - DO NOT assume specific method names exist - verify first!
 		
-		4. Reply Strategy:
-		   - IMPORTANT: Include reply logic in code (e.g., reply_tools.send_message())
-		   - Complete the full workflow: fetch data -> process -> reply to user
-		   - Don't just return data, make sure to notify the user of results
-		
-		5. Error Handling:
-		   - Wrap API calls in try/except blocks
+		4. Error Handling:
+		   - Wrap risky operations in try/except blocks
 		   - Return error information when operations fail
-		   - Example: except Exception as e: return {"error": str(e)}
+		   - Example: except Exception as e: return {"success": False, "error": str(e)}
 		
-		EXAMPLE:
+		IMPORTANT NOTES:
+		- The code runs in a GraalVM Python sandbox environment
+		- Only use tools that are explicitly available in the current session
+		- When in doubt about available tools, write pure Python code that returns results
+		- The agent can display results to users after code execution
+		
+		EXAMPLE (Pure Computation):
 		write_code(
-		    functionName='search_and_reply',
-		    description='Search for information and reply to user',
-		    parameters=['query'],
-		    code='''def search_and_reply(query):
-		    \"\"\"Search for information and reply to user\"\"\"
+		    functionName='calculate_sum',
+		    description='Calculate the sum of two numbers',
+		    parameters=['a', 'b'],
+		    code='''def calculate_sum(a, b):
+		    \"\"\"Calculate the sum of two numbers\"\"\"
 		    try:
-		        results = search_tools.search(query)
-		        if results:
-		            reply_tools.send_message(f"Found: {results}")
-		            return {"success": True, "results": results}
-		        else:
-		            reply_tools.send_message("No results found")
-		            return {"success": False, "message": "No results"}
+		        result = a + b
+		        return {"success": True, "sum": result, "message": f"{a} + {b} = {result}"}
 		    except Exception as e:
-		        reply_tools.send_message(f"Search failed: {e}")
-		        return {"error": str(e)}
+		        return {"success": False, "error": str(e)}
 		'''
 		)
 		""";
