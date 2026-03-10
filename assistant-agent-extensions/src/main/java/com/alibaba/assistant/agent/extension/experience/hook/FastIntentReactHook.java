@@ -47,9 +47,6 @@ import java.util.concurrent.CompletableFuture;
  *
  * <p>优先级：{@link HookPriorityConstants#FAST_INTENT_HOOK}（50），
  * 确保在评估 Hook 之前执行。
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段，
- * 不再需要 @HookPhases 注解区分阶段。
  */
 @HookPositions(HookPosition.BEFORE_AGENT)
 public class FastIntentReactHook extends AgentHook implements Prioritized {

@@ -41,9 +41,6 @@ import java.util.concurrent.CompletableFuture;
  *
  * 优先级：{@link HookPriorityConstants#REACT_EXPERIENCE_HOOK}（20），
  * 确保在快速意图 Hook（50）之前执行。
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段，
- * 不再需要 @HookPhases 注解区分阶段。
  *
  * @author Assistant Agent Team
  */

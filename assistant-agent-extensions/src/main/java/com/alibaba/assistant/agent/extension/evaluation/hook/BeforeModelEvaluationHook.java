@@ -42,9 +42,6 @@ import java.util.concurrent.CompletableFuture;
  * <ul>
  *     <li>实现 {@link #createEvaluationContext(OverAllState, RunnableConfig)} 方法创建评估上下文</li>
  * </ul>
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段，
- * 不再需要 @HookPhases 注解区分阶段。
  *
  * @author Assistant Agent Team
  * @see ReactBeforeModelEvaluationHook

@@ -20,8 +20,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * 默认评估套件配置属性
  *
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，只保留一个统一的评估套件。
- *
  * @author Assistant Agent Team
  * @since 1.0.0
  */
@@ -68,7 +66,7 @@ public class DefaultEvaluationProperties {
     }
 
     /**
-     * @deprecated 4.1 重构后不再区分阶段，使用 {@link #isEnabled()} 代替
+     * @deprecated 不再区分阶段，使用 {@link #isEnabled()} 代替
      */
     @Deprecated
     public PhaseConfig getReactPhase() {
@@ -79,7 +77,7 @@ public class DefaultEvaluationProperties {
     }
 
     /**
-     * @deprecated 4.1 重构后不再区分阶段
+     * @deprecated 不再区分阶段
      */
     @Deprecated
     public void setReactPhase(PhaseConfig reactPhase) {
@@ -88,7 +86,7 @@ public class DefaultEvaluationProperties {
     }
 
     /**
-     * @deprecated 4.1 重构后不再有 CodeAct 阶段
+     * @deprecated 已弃用
      */
     @Deprecated
     public PhaseConfig getCodeactPhase() {
@@ -98,7 +96,7 @@ public class DefaultEvaluationProperties {
     }
 
     /**
-     * @deprecated 4.1 重构后不再有 CodeAct 阶段
+     * @deprecated 已弃用
      */
     @Deprecated
     public void setCodeactPhase(PhaseConfig codeactPhase) {
@@ -106,7 +104,7 @@ public class DefaultEvaluationProperties {
     }
 
     /**
-     * @deprecated 4.1 重构后不再区分阶段
+     * @deprecated 不再区分阶段
      */
     @Deprecated
     public static class PhaseConfig {

@@ -33,8 +33,6 @@ import java.util.List;
  *
  * <p>Example 层只负责定义 Criterion 的结构和数据，不包含评估器创建逻辑。
  * 评估器由 Starter 层自动装配。
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，只保留一个统一的评估套件。
  *
  * @author Assistant Agent Team
  * @since 1.0.0

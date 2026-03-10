@@ -43,9 +43,6 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Agent执行完成后学习Hook
  * 在Agent执行完成后触发学习，收集完整的执行信息
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段，
- * 不再需要 @HookPhases 注解区分阶段。
  *
  * @author Assistant Agent Team
  * @since 1.0.0

@@ -41,9 +41,6 @@ import java.util.concurrent.CompletableFuture;
 /**
  * 将 PromptContributor 机制接入 ModelHook 的抽象基类
  * 在 BEFORE_MODEL 阶段执行，将 PromptContribution 注入到 messages
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段，
- * 不再需要 @HookPhases 注解区分阶段。
  *
  * @author Assistant Agent Team
  * @see ReactPromptContributorModelHook
@@ -100,7 +97,6 @@ public abstract class PromptContributorModelHook extends ModelHook implements Pr
             // 注意：systemMessage 传 null，因为框架中 AgentLlmNode 的 systemMessage 
             // 来自构建时的固定值 this.systemPrompt，不会存入 OverAllState，
             // 所以无法从 state 中获取。如需获取 systemMessage，应改用 ModelInterceptor。
-            // 4.1 重构后：取消了 Codeact 阶段的 LLM 调用，统一使用 "REACT" 阶段
             PromptContributorContext context = new OverAllStatePromptContributorContext(
                     state, null, "REACT");
 

@@ -41,16 +41,15 @@ import java.util.function.BiFunction;
 /**
  * WriteConditionCodeTool - 条件判断代码注册工具
  *
- * <p>职责（4.1 重构后）：
+ * <p>职责：
  * <ul>
  * <li>接收 LLM 在 React 阶段直接生成的条件判断函数代码</li>
  * <li>验证代码格式（函数名、参数、返回值类型）</li>
  * <li>将代码注入到 CodeContext，供触发器使用</li>
  * </ul>
  *
- * <p>改造说明：
+ * <p>说明：
  * <ul>
- * <li>取消了对 condition-code-generator 子Agent 的委托调用</li>
  * <li>新增 code 参数，直接接收完整的 Python 条件函数代码</li>
  * <li>条件函数必须返回 boolean 值（True/False）</li>
  * </ul>

@@ -17,7 +17,6 @@ spring:
             timeout-ms: 5000
 
             # 输入路由评估配置
-            # 4.1 重构后统一使用 default-suite
             input-routing:
               enabled: true
               suite-id: default-suite

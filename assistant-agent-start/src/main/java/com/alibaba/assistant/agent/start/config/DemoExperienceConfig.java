@@ -30,8 +30,6 @@ import java.util.UUID;
  * <li>REACT 经验：用户输入"你是谁"时不调用工具，先反问用户</li>
  * <li>REACT 经验：用户想计算"小明系数"时先写代码再反问乘方系数</li>
  * </ol>
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，不再需要 CODE 类型的经验。
  *
  * @author Assistant Agent Team
  * @since 1.0.0

@@ -37,9 +37,6 @@ import java.util.concurrent.CompletableFuture;
  * 3. 查找现有SystemMessage并追加，或添加新的SystemMessage
  * 4. 通过返回Map.of("messages", newMessages)更新OverAllState
  *
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段，
- * 不再需要 @HookPhases 注解区分阶段。
- *
  * @author Assistant Agent Team
  */
 @HookPositions(HookPosition.BEFORE_MODEL)

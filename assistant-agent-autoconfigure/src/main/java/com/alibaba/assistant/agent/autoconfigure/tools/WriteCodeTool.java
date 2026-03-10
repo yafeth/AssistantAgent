@@ -44,16 +44,15 @@ import java.util.function.BiFunction;
 /**
  * WriteCodeTool - 代码注册工具
  *
- * <p>职责（4.1 重构后）：
+ * <p>职责：
  * <ul>
  * <li>接收 LLM 在 React 阶段直接生成的完整 Python 代码</li>
  * <li>验证代码格式（函数名、参数是否匹配）</li>
  * <li>将代码注入到 CodeContext，供后续 execute_code 调用</li>
  * </ul>
  *
- * <p>改造说明：
+ * <p>说明：
  * <ul>
- * <li>取消了对 CodeGeneratorSubAgent 的委托调用</li>
  * <li>新增 code 参数，直接接收完整的 Python 函数代码</li>
  * <li>保留 FastIntent 快速匹配能力</li>
  * </ul>

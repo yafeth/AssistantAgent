@@ -25,8 +25,6 @@ import java.util.List;
  *
  * <p>实现此接口可以向默认评估套件添加自定义 Criterion。
  * 这是一个模板模式的接口，Example 层只需实现此接口提供 Criterion 定义即可。
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，只保留一个统一的评估套件。
  *
  * <p>使用方式：
  * <pre>
@@ -60,7 +58,7 @@ public interface EvaluationCriterionProvider {
     }
 
     /**
-     * @deprecated 4.1 重构后不再区分阶段，使用 {@link #getCriteria()} 代替
+     * @deprecated 不再区分阶段，使用 {@link #getCriteria()} 代替
      */
     @Deprecated
     default List<EvaluationCriterion> getReactPhaseCriteria() {
@@ -68,7 +66,7 @@ public interface EvaluationCriterionProvider {
     }
 
     /**
-     * @deprecated 4.1 重构后不再有 CodeAct 阶段，使用 {@link #getCriteria()} 代替
+     * @deprecated 已弃用，使用 {@link #getCriteria()} 代替
      */
     @Deprecated
     default List<EvaluationCriterion> getCodeActPhaseCriteria() {

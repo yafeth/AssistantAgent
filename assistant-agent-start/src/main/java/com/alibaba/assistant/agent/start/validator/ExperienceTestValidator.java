@@ -21,7 +21,7 @@ import java.util.Set;
  * <p>Tests experience query functionality after application startup to ensure
  * experience hooks are working correctly.
  * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，只验证 COMMON 和 REACT 类型的经验。
+ * <p>验证 COMMON 和 REACT 类型的经验。
  *
  * @author Assistant Agent Team
  * @since 1.0.0

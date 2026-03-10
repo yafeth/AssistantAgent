@@ -153,13 +153,6 @@ public class CodeactAgent extends ReactAgent {
 
 	/**
 	 * Builder for CodeactAgent that extends ReactAgent.Builder.
-	 * 
-	 * <p>4.1 重构说明：
-	 * <ul>
-	 *   <li>移除了 subAgentHooks、subAgentSystemPrompt、stateKeysToPropagate 等 SubAgent 相关配置</li>
-	 *   <li>write_code 工具现在直接接收完整代码，不再调用 SubAgent 生成代码</li>
-	 *   <li>所有 Hooks 统一通过 hooks() 方法配置，不再区分阶段</li>
-	 * </ul>
 	 */
 	public static class CodeactAgentBuilder extends Builder {
 
@@ -606,7 +599,6 @@ public class CodeactAgent extends ReactAgent {
 				this.executionTimeoutMs
 			);
 
-			// 4.1 重构：直接创建 write_code 和 execute_code 工具，不再使用 SubAgent
 			CodeFastIntentSupport codeFastIntentSupport = 
 				(experienceProvider != null && experienceExtensionProperties != null && fastIntentService != null)
 					? new CodeFastIntentSupport(experienceProvider, experienceExtensionProperties, fastIntentService)
@@ -685,7 +677,6 @@ public class CodeactAgent extends ReactAgent {
 				allTools.addAll(tools);
 			}
 
-			// 4.1 重构：直接添加 write_code、write_condition_code、execute_code 工具
 			allTools.add(WriteCodeTool.createWriteCodeToolCallback(
 				this.codeContext, this.environmentManager, codeFastIntentSupport));
 			
@@ -781,14 +772,14 @@ public class CodeactAgent extends ReactAgent {
 				this.codeactToolRegistry.getAllTools();
 
 			if (codeactTools.isEmpty()) {
-				logger.info("CodeactAgentBuilder#logRegisteredTools - reason=CodeAct阶段工具数量, count=0");
+				logger.info("CodeactAgentBuilder#logRegisteredTools - reason=CodeactTool数量, count=0");
 			} else {
-				logger.info("CodeactAgentBuilder#logRegisteredTools - reason=CodeAct阶段工具数量, count={}",
+				logger.info("CodeactAgentBuilder#logRegisteredTools - reason=CodeactTool数量, count={}",
 					codeactTools.size());
 
 				for (int i = 0; i < codeactTools.size(); i++) {
 					CodeactTool tool = codeactTools.get(i);
-					logger.info("CodeactAgentBuilder#logRegisteredTools - reason=CodeAct工具详情, " +
+					logger.info("CodeactAgentBuilder#logRegisteredTools - reason=CodeactTool详情, " +
 						"index={}, name={}, description={}",
 						i + 1,
 						tool.getToolDefinition().name(),

@@ -38,8 +38,6 @@ import org.springframework.stereotype.Component;
  * 无法通过 {@code systemTextToAppend} 修改 systemMessage。
  * <p>因此，本实现采用 {@code messagesToAppend} 方式，将指导内容作为 Message 追加到对话历史中。
  * Hook 会将其转换为 AssistantMessage + ToolResponseMessage 的形式注入，LLM 会将其作为上下文信息理解。
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，只保留一个统一的 Prompt 指导提供者。
  *
  * @author Assistant Agent Team
  * @since 1.0.0

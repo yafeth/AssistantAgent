@@ -160,7 +160,6 @@ public class CodeactAgentConfig {
 	 *   <li>快速意图 Hook（FastIntentReactHook）</li>
 	 * </ul>
 	 * 
-	 * <p>4.1 重构后取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段。
 	 */
 	@Autowired(required = false)
 	private List<Hook> allHooks;
@@ -275,7 +274,7 @@ public class CodeactAgentConfig {
 				.executionTimeout(30000)
                 .tools(replyCodeactTools != null ? replyCodeactTools.toArray(new ToolCallback[0]) : new ToolCallback[0])
                 .codeactTools(allCodeactTools)
-                .hooks(allHooks)  // 4.1 重构：所有 Hooks 统一应用于 React 阶段
+                .hooks(allHooks)
 				.experienceProvider(experienceProvider)
 				.experienceExtensionProperties(experienceExtensionProperties)
 				.fastIntentService(fastIntentService)

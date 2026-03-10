@@ -49,8 +49,6 @@ import java.util.List;
  * <p>提供默认的评估套件。
  * 用户可以通过配置属性自定义评估行为，或通过实现 {@link EvaluationCriterionProvider}
  * 接口添加自定义 Criterion。
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，只保留一个统一的评估套件。
  *
  * @author Assistant Agent Team
  * @since 1.0.0
@@ -64,7 +62,6 @@ public class DefaultEvaluationSuiteConfig {
 
     /**
      * 默认评估套件 ID
-     * <p>4.1 重构后统一使用此 ID，兼容旧配置中的 react-phase-suite
      */
     public static final String DEFAULT_SUITE_ID = "default-suite";
     
@@ -122,8 +119,6 @@ public class DefaultEvaluationSuiteConfig {
 
     /**
      * 评估 Hooks
-     * 
-     * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用。
      */
     @Bean
     public List<Hook> evaluationHooks(

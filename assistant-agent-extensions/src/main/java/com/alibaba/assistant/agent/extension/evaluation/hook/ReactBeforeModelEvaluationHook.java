@@ -26,9 +26,6 @@ import com.alibaba.cloud.ai.graph.RunnableConfig;
  * 
  * <p>在 React Agent（主 Agent）的模型调用前进行评估，
  * 关注用户输入和对话历史的增强与评估。
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段，
- * 不再需要 @HookPhases 注解区分阶段。
  *
  * @author Assistant Agent Team
  * @since 1.0.0

@@ -31,8 +31,6 @@ import java.util.List;
 /**
  * Prompt Contributor 自动配置类
  * 负责创建 PromptContributorManager 和 PromptContributorModelHook
- * 
- * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，所有 Hooks 统一应用于 React 阶段。
  *
  * @author Assistant Agent Team
  */
@@ -55,8 +53,6 @@ public class PromptContributorAutoConfiguration {
 
     /**
      * 提供 PromptContributorModelHook
-     * 
-     * <p>4.1 重构后：取消了 Codeact 阶段的 LLM 调用，统一使用 React 阶段的 Hook。
      */
     @Bean
     @ConditionalOnProperty(prefix = "spring.ai.alibaba.codeact.extension.prompt.react", name = "enabled", havingValue = "true")
