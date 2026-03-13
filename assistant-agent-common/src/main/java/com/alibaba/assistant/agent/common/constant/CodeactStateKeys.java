@@ -107,12 +107,28 @@ public final class CodeactStateKeys {
 	// ==================== 工具上下文（只读） ====================
 
 	/**
+	 * 注入的全部 codeact 工具名称列表
+	 *
+	 * <p>类型：List&lt;String&gt;
+	 * <p>由 CodeactToolsStateInitHook 在 beforeAgent 阶段注入
+	 * <p>只存储工具名称，避免序列化 CodeactTool 对象（其中包含不可序列化的组件）
+	 * <p>完整的工具对象应通过 CodeactToolRegistry 获取
+	 * 
+	 * @since 1.0.1
+	 */
+	public static final String CODEACT_TOOL_NAMES = "codeact_tool_names";
+
+	/**
 	 * 注入的全部 codeact 工具列表
 	 *
 	 * <p>类型：List&lt;CodeactTool&gt;
 	 * <p>由 CodeGeneratorSubAgent.init_context 节点注入
 	 * <p>上层应用可读取此列表进行评估
+	 * 
+	 * @deprecated 由于 CodeactTool 包含不可序列化的组件，不应将其写入 State。
+	 *             请使用 {@link #CODEACT_TOOL_NAMES} 存储工具名称，并通过 CodeactToolRegistry 获取完整工具对象。
 	 */
+	@Deprecated
 	public static final String CODEACT_TOOLS = "codeact_tools";
 
 	/**

@@ -32,12 +32,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * CodeactTools 状态初始化 Hook
  *
  * <p>在 BEFORE_AGENT 阶段最先执行，将 {@link CodeactToolRegistry} 中注册的所有
- * {@link CodeactTool} 注入到 {@link OverAllState} 的 {@code codeact_tools} 键中。
+ * 工具名称注入到 {@link OverAllState} 的 {@code codeact_tool_names} 键中。
+ *
+ * <p><b>重要</b>：为避免序列化问题，不再将完整的 {@link CodeactTool} 对象写入 State。
+ * 完整的工具对象应通过 {@link CodeactToolRegistry} 获取，而不是从 State 中读取。
+ * 
+ * <p>写入 State 的数据：
+ * <ul>
+ *   <li>{@code codeact_tool_names} - 所有工具名称列表 (List&lt;String&gt;)，可序列化</li>
+ * </ul>
  *
  * <p>优先级为 {@value #ORDER}，确保在所有其他 BEFORE_AGENT Hook 之前执行。
  *
@@ -55,11 +64,11 @@ public class CodeactToolsStateInitHook extends AgentHook implements Prioritized 
      * <p>
      * 执行顺序：
      * <ol>
-     *   <li>CodeactToolsStateInitHook (5) - 注入 codeact_tools 到 state</li>
+     *   <li>CodeactToolsStateInitHook (5) - 注入 codeact_tool_names 到 state</li>
      *   <li>ReactExperienceHook (20) - React 经验注入</li>
      *   <li>TaskTreeInitHook (30) - 任务树初始化</li>
      *   <li>FastIntentHook (50) - 快速意图判断</li>
-     *   <li>EvaluationHook (100) - 评估（读取 codeact_tools）</li>
+     *   <li>EvaluationHook (100) - 评估（通过 Registry 获取工具）</li>
      *   <li>PromptContributorHook (200) - Prompt 注入</li>
      * </ol>
      */
@@ -81,15 +90,31 @@ public class CodeactToolsStateInitHook extends AgentHook implements Prioritized 
         return ORDER;
     }
 
+    /**
+     * 获取 CodeactToolRegistry 实例
+     * <p>
+     * 供其他组件使用，以便从 Registry 中获取完整的工具对象。
+     * 
+     * @return CodeactToolRegistry 实例
+     */
+    public CodeactToolRegistry getCodeactToolRegistry() {
+        return codeactToolRegistry;
+    }
+
     @Override
     public CompletableFuture<Map<String, Object>> beforeAgent(OverAllState state, RunnableConfig config) {
         List<CodeactTool> allTools = codeactToolRegistry.getAllTools();
+        
+        // 只写入工具名称列表，避免序列化 CodeactTool 对象（其中包含不可序列化的 DefaultToolDefinition）
+        List<String> toolNames = allTools.stream()
+                .map(CodeactTool::getName)
+                .collect(Collectors.toList());
 
         Map<String, Object> updates = new HashMap<>();
-        updates.put(CodeactStateKeys.CODEACT_TOOLS, allTools);
+        updates.put(CodeactStateKeys.CODEACT_TOOL_NAMES, toolNames);
 
-        log.info("CodeactToolsStateInitHook#beforeAgent - reason=注入codeact_tools到state, toolCount={}",
-                allTools.size());
+        log.info("CodeactToolsStateInitHook#beforeAgent - reason=注入codeact_tool_names到state, toolCount={}",
+                toolNames.size());
 
         return CompletableFuture.completedFuture(updates);
     }
