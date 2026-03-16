@@ -98,6 +98,10 @@ public class FastIntentReactHook extends AgentHook implements Prioritized {
         log.info("FastIntentReactHook#beforeAgent - reason=try react fast-intent match");
 
         try {
+            if (isFastIntentAlreadyActive(state)) {
+                log.info("FastIntentReactHook#beforeAgent - reason=skip because fast-intent is already active");
+                return CompletableFuture.completedFuture(Map.of());
+            }
             if (!properties.isEnabled() || !properties.isReactExperienceEnabled()) {
                 return CompletableFuture.completedFuture(Map.of());
             }
@@ -221,6 +225,19 @@ public class FastIntentReactHook extends AgentHook implements Prioritized {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private boolean isFastIntentAlreadyActive(OverAllState state) {
+        if (state == null) {
+            return false;
+        }
+        Object fastIntentObj = state.value(HookPriorityConstants.FAST_INTENT_STATE_KEY).orElse(null);
+        if (!(fastIntentObj instanceof Map<?, ?> fastIntentState)) {
+            return false;
+        }
+        Object hit = ((Map<String, Object>) fastIntentState).get("hit");
+        return Boolean.TRUE.equals(hit);
+    }
+
     private ExperienceQueryContext buildQueryContext(OverAllState state, RunnableConfig config, String userQuery) {
         ExperienceQueryContext context = new ExperienceQueryContext();
         // 关键修复：设置userQuery，用于向量搜索
@@ -239,5 +256,4 @@ public class FastIntentReactHook extends AgentHook implements Prioritized {
         return context;
     }
 }
-
 

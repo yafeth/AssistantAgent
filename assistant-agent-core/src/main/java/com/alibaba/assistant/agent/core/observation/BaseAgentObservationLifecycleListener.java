@@ -155,7 +155,12 @@ public abstract class BaseAgentObservationLifecycleListener implements GraphLife
         // 创建新的并存入 state
         obsState = new DefaultObservationState();
         sessionStates.put(sessionId, obsState);
-        state.put(OBSERVATION_STATE_KEY, obsState);
+        try {
+            state.put(OBSERVATION_STATE_KEY, obsState);
+        } catch (UnsupportedOperationException e) {
+            log.warn("BaseAgentObservationLifecycleListener#getOrCreateObservationState - reason=state map is unmodifiable, sessionId={}",
+                    sessionId);
+        }
         return obsState;
     }
 
@@ -503,4 +508,3 @@ public abstract class BaseAgentObservationLifecycleListener implements GraphLife
         nodeStartTimes.keySet().removeIf(key -> key.startsWith(sessionId + ":"));
     }
 }
-

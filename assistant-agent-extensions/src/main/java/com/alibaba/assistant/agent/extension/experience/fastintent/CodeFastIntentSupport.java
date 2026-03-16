@@ -1,5 +1,6 @@
 package com.alibaba.assistant.agent.extension.experience.fastintent;
 
+import com.alibaba.assistant.agent.common.constant.HookPriorityConstants;
 import com.alibaba.assistant.agent.extension.experience.config.ExperienceExtensionProperties;
 import com.alibaba.assistant.agent.extension.experience.model.Experience;
 import com.alibaba.assistant.agent.extension.experience.model.ExperienceArtifact;
@@ -60,6 +61,11 @@ public class CodeFastIntentSupport {
             RunnableConfig config = (RunnableConfig) toolContext.getContext()
                     .get(ToolContextConstants.AGENT_CONFIG_CONTEXT_KEY);
 
+            if (isFastIntentActive(state)) {
+                log.info("CodeFastIntentSupport#tryHit - reason=skip CODE fast-intent because REACT fast-intent is already active");
+                return Optional.empty();
+            }
+
             String input = state != null ? state.value("input", String.class).orElse(null) : null;
             Map<String, Object> md = config != null ? config.metadata().orElse(Map.of()) : Map.of();
             @SuppressWarnings("unchecked")
@@ -100,6 +106,19 @@ public class CodeFastIntentSupport {
             log.warn("CodeFastIntentSupport#tryHit - reason=fast-intent failed, fallback to normal flow, error={}", e.getMessage());
             return Optional.empty();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean isFastIntentActive(OverAllState state) {
+        if (state == null) {
+            return false;
+        }
+        Object fastIntentObj = state.value(HookPriorityConstants.FAST_INTENT_STATE_KEY).orElse(null);
+        if (!(fastIntentObj instanceof Map<?, ?> fastIntentState)) {
+            return false;
+        }
+        Object hit = ((Map<String, Object>) fastIntentState).get("hit");
+        return Boolean.TRUE.equals(hit);
     }
 
     private ExperienceQueryContext buildQueryContext(OverAllState state, RunnableConfig config, String language, String userQuery) {
@@ -145,5 +164,4 @@ public class CodeFastIntentSupport {
         }
     }
 }
-
 
