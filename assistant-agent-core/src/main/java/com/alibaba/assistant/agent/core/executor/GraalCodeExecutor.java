@@ -259,33 +259,8 @@ public class GraalCodeExecutor {
 			}
 			codeBuilder.append("# === 历史代码结束 ===\n\n");
 
-			// Check if the function accepts parameters by inspecting the code
-			// Need to handle:
-			// - def foo(): or def foo() ->
-			// - def foo(**kwargs): or def foo(param1, param2):
-			// Use DOTALL flag to match across newlines
-			Pattern noParamsPattern = Pattern.compile(
-				"def\\s+" + Pattern.quote(actualFunctionName) + "\\s*\\(\\s*\\)",
-				Pattern.DOTALL
-			);
-			boolean functionHasNoParams = noParamsPattern.matcher(code.getCode()).find();
-
-			// Generate function call
-			String functionCall;
-			if (!functionHasNoParams && args != null && !args.isEmpty()) {
-				// Function accepts parameters and we have args to pass
-				functionCall = environmentManager.generateFunctionCall(actualFunctionName, args);
-				logger.debug("GraalCodeExecutor#execute - reason=函数接受参数生成带参数调用, functionCall={}", functionCall);
-			} else {
-				// Function doesn't accept parameters or no args provided
-				functionCall = actualFunctionName + "()";
-				if (args != null && !args.isEmpty()) {
-					logger.warn("GraalCodeExecutor#execute - reason=函数不接受参数但提供了args将忽略, args={}", args);
-				}
-			}
-
 			codeBuilder.append("# Execute function\n");
-			codeBuilder.append("_result = ").append(functionCall).append("\n");
+			codeBuilder.append(buildFunctionInvocationCode(actualFunctionName, args));
 			codeBuilder.append("_result  # Return the result\n");
 
 			finalCode = codeBuilder.toString();
@@ -317,6 +292,31 @@ public class GraalCodeExecutor {
 		}
 
 		return record;
+	}
+
+	private String buildFunctionInvocationCode(String functionName, Map<String, Object> args) {
+		if (args == null || args.isEmpty()) {
+			return "_result = " + functionName + "()\n";
+		}
+
+		String argsLiteral = toPythonLiteral(args);
+		return """
+				__codeact_args = %s
+				def __codeact_safe_invoke(func, kwargs):
+				    import inspect
+				    signature = inspect.signature(func)
+				    parameters = signature.parameters.values()
+				    if any(param.kind == inspect.Parameter.VAR_KEYWORD for param in parameters):
+				        return func(**kwargs)
+				
+				    filtered_kwargs = {}
+				    for param in signature.parameters.values():
+				        if param.kind in (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY) and param.name in kwargs:
+				            filtered_kwargs[param.name] = kwargs[param.name]
+				
+				    return func(**filtered_kwargs)
+				_result = __codeact_safe_invoke(%s, __codeact_args)
+				""".formatted(argsLiteral, functionName);
 	}
 
 	/**
@@ -1376,4 +1376,3 @@ public class GraalCodeExecutor {
 	}
 
 }
-
