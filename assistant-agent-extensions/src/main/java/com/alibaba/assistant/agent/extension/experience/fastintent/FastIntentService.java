@@ -154,7 +154,7 @@ public class FastIntentService {
             if (!StringUtils.hasText(input) || !StringUtils.hasText(condition.getValue())) {
                 return false;
             }
-            boolean trim = Boolean.TRUE.equals(condition.getTrim());
+            boolean trim = condition.getTrim() == null || Boolean.TRUE.equals(condition.getTrim());
             boolean ignoreCase = Boolean.TRUE.equals(condition.getIgnoreCase());
             String s = trim ? input.trim() : input;
             String prefix = condition.getValue();
@@ -274,5 +274,4 @@ public class FastIntentService {
         }
     }
 }
-
 
