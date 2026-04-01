@@ -126,6 +126,7 @@ public class FastIntentReactHook extends AgentHook implements Prioritized {
 
             ExperienceQuery query = new ExperienceQuery(ExperienceType.REACT);
             query.setLimit(Math.max(20, properties.getMaxItemsPerQuery())); // fastpath needs enough candidates
+            query.setRetrievalMode(ExperienceQuery.RetrievalMode.FULL_SCAN);
             // 关键修复：设置查询文本，用于向量搜索
             if (StringUtils.hasText(userInput)) {
                 query.setText(userInput);
@@ -253,4 +254,3 @@ public class FastIntentReactHook extends AgentHook implements Prioritized {
         return context;
     }
 }
-
