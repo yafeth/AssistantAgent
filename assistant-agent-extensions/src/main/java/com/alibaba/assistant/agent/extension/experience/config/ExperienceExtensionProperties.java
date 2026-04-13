@@ -54,6 +54,17 @@ public class ExperienceExtensionProperties {
     private List<String> fastIntentAllowedTools = new ArrayList<>();
 
     /**
+     * Progressive disclosure 下允许直接以 React function call 形式暴露的工具名白名单。
+     *
+     * <p>首版采用显式 allowlist：
+     * <ul>
+     *     <li>未配置的 TOOL 经验仍然只能通过 write_code / execute_code 走 CodeAct 路径</li>
+     *     <li>已配置的工具会额外注册到 React 阶段，但运行时仍会根据预取/检索结果做二次裁剪</li>
+     * </ul>
+     */
+    private List<String> reactDirectToolNames = new ArrayList<>();
+
+    /**
      * 单次查询最大返回经验条数
      */
     private int maxItemsPerQuery = 5;
@@ -234,6 +245,15 @@ public class ExperienceExtensionProperties {
     public void setFastIntentAllowedTools(List<String> fastIntentAllowedTools) {
         this.fastIntentAllowedTools = fastIntentAllowedTools != null ? fastIntentAllowedTools : new ArrayList<>();
     }
+
+    public List<String> getReactDirectToolNames() {
+        return reactDirectToolNames;
+    }
+
+    public void setReactDirectToolNames(List<String> reactDirectToolNames) {
+        this.reactDirectToolNames = reactDirectToolNames != null ? reactDirectToolNames : new ArrayList<>();
+    }
+
     public int getMaxItemsPerQuery() {
         return maxItemsPerQuery;
     }

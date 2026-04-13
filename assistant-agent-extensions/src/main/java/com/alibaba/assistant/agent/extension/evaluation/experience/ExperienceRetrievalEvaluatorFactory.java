@@ -284,10 +284,6 @@ public class ExperienceRetrievalEvaluatorFactory {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("【%s】(%s)\n", exp.getTitle(), exp.getType()));
 
-        if (StringUtils.hasText(exp.getLanguage())) {
-            sb.append(String.format("语言: %s\n", exp.getLanguage()));
-        }
-
         Set<String> tags = exp.getTags();
         if (tags != null && !tags.isEmpty()) {
             sb.append(String.format("标签: %s\n", String.join(", ", tags)));
@@ -309,10 +305,6 @@ public class ExperienceRetrievalEvaluatorFactory {
             Experience exp = experiences.get(i);
             sb.append(String.format("=== 经验 %d: %s ===\n", i + 1, exp.getTitle()));
             sb.append(String.format("类型: %s\n", exp.getType()));
-
-            if (StringUtils.hasText(exp.getLanguage())) {
-                sb.append(String.format("语言: %s\n", exp.getLanguage()));
-            }
 
             Set<String> tags = exp.getTags();
             if (tags != null && !tags.isEmpty()) {

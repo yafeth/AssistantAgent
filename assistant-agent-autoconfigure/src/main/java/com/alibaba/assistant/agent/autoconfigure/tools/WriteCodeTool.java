@@ -19,15 +19,13 @@ import com.alibaba.assistant.agent.core.context.CodeContext;
 import com.alibaba.assistant.agent.core.context.SessionCodeManager;
 import com.alibaba.assistant.agent.core.executor.RuntimeEnvironmentManager;
 import com.alibaba.assistant.agent.core.model.GeneratedCode;
-import com.alibaba.assistant.agent.extension.experience.fastintent.CodeFastIntentSupport;
-import com.alibaba.assistant.agent.extension.experience.model.Experience;
-import com.alibaba.assistant.agent.extension.experience.model.FastIntentConfig;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.agent.tools.ToolContextConstants;
 import com.alibaba.cloud.ai.graph.store.Store;
 import com.alibaba.cloud.ai.graph.store.StoreItem;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 /**
@@ -68,18 +65,10 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 	private final CodeContext codeContext;
 	private final RuntimeEnvironmentManager environmentManager;
 
-	private final CodeFastIntentSupport codeFastIntentSupport;
-
 	public WriteCodeTool(CodeContext codeContext,
-						 RuntimeEnvironmentManager environmentManager,
-						 CodeFastIntentSupport codeFastIntentSupport) {
+						 RuntimeEnvironmentManager environmentManager) {
 		this.codeContext = codeContext;
 		this.environmentManager = environmentManager;
-		this.codeFastIntentSupport = codeFastIntentSupport;
-	}
-
-	public WriteCodeTool(CodeContext codeContext, RuntimeEnvironmentManager environmentManager) {
-		this(codeContext, environmentManager, null);
 	}
 
 	@Override
@@ -87,12 +76,6 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 		logger.info("WriteCodeTool#apply 注册代码: functionName={}", request.functionName);
 
 		try {
-			// 0. FastPath Intent (CODE): hit => skip code validation
-			String fastIntentResult = tryFastIntent(request, toolContext);
-			if (fastIntentResult != null) {
-				return fastIntentResult;
-			}
-
 			// 1. 验证必填参数
 			if (request.functionName == null || request.functionName.trim().isEmpty()) {
 				return "Error: functionName is required";
@@ -121,45 +104,6 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 		} catch (Exception e) {
 			logger.error("WriteCodeTool#apply 代码注册失败", e);
 			return "Error: " + e.getMessage();
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private String tryFastIntent(Request request, ToolContext toolContext) {
-		try {
-			if (codeFastIntentSupport == null || toolContext == null) {
-				return null;
-			}
-
-			String language = (codeContext != null && codeContext.getLanguage() != null) ? codeContext.getLanguage().name() : null;
-			Map<String, Object> toolReq = CodeFastIntentSupport.toolReqOf(request.description, request.functionName, request.parameters);
-			Optional<CodeFastIntentSupport.Hit> hitOpt = codeFastIntentSupport.tryHit(toolContext, toolReq, language);
-			if (hitOpt.isEmpty()) {
-				return null;
-			}
-
-			Experience best = hitOpt.get().experience();
-			String code = hitOpt.get().code();
-			try {
-				registerCode(request, code, toolContext);
-			} catch (Exception e) {
-				String err = e.getMessage();
-				logger.warn("WriteCodeTool#tryFastIntent - reason=fast-intent register failed, expId={}, error={}",
-						best.getId(), err);
-
-				FastIntentConfig.FastIntentFallback fb = CodeFastIntentSupport.getOnRegisterFallback(best);
-				if (fb == FastIntentConfig.FastIntentFallback.FAIL_FAST) {
-					return "Error: FastIntent(Code) register failed: " + err;
-				}
-				return null;
-			}
-
-			logger.info("WriteCodeTool#tryFastIntent - reason=fast-intent HIT (skip codegen), expId={}", best.getId());
-			return "FastIntent(Code) hit: " + best.getTitle() + "\n```python\n" + code + "\n```";
-
-		} catch (Exception e) {
-			logger.warn("WriteCodeTool#tryFastIntent - reason=fast-intent failed, fallback to normal flow, error={}", e.getMessage());
-			return null;
 		}
 	}
 
@@ -291,7 +235,8 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 		必需参数：
 		- functionName：函数名称（snake_case 格式，例如 'calculate_sum'）
 		- description：函数功能的简要描述
-		- parameters：函数接受的参数名列表
+		- parameters：函数参数名的字符串数组。只写参数名，不要包含类型或描述。无参数时传空数组 []。
+		  正确示例：["a", "b"]、["query"]、[]
 		- code：完整的 Python 函数代码，包含 'def' 语句和完整实现
 		
 		代码编写规范：
@@ -323,20 +268,22 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 		- 只使用当前会话中明确可用的工具
 		- 不确定可用工具时，编写返回结果的纯 Python 代码
 		- Agent 可以在代码执行后向用户展示结果
+		- ⚠️ 代码整洁要求：生成的代码禁止包含任何注释（# 注释、多行注释、步骤说明、TODO 等），只保留纯净的业务逻辑。函数定义处可保留一行简洁的 docstring
 		
-		示例（纯计算）：
+		示例（有参数）：
 		write_code(
 		    functionName='calculate_sum',
 		    description='计算两个数的和',
 		    parameters=['a', 'b'],
-		    code='''def calculate_sum(a, b):
-		    \"\"\"计算两个数的和\"\"\"
-		    try:
-		        result = a + b
-		        return {"success": True, "sum": result, "message": f"{a} + {b} = {result}"}
-		    except Exception as e:
-		        return {"success": False, "error": str(e)}
-		'''
+		    code='def calculate_sum(a, b):\\n    \"\"\"计算两个数的和\"\"\"\\n    try:\\n        result = a + b\\n        return {"success": True, "sum": result}\\n    except Exception as e:\\n        return {"success": False, "error": str(e)}'
+		)
+		
+		示例（无参数）：
+		write_code(
+		    functionName='get_current_time',
+		    description='获取当前时间',
+		    parameters=[],
+		    code='def get_current_time():\\n    \"\"\"获取当前时间\"\"\"\\n    import datetime\\n    now = datetime.datetime.now()\\n    return {"success": True, "time": str(now)}'
 		)
 		""";
 
@@ -345,21 +292,14 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 	 */
 	public static ToolCallback createWriteCodeToolCallback(
 			CodeContext codeContext,
-			RuntimeEnvironmentManager environmentManager,
-			CodeFastIntentSupport codeFastIntentSupport) {
+			RuntimeEnvironmentManager environmentManager) {
 
-		WriteCodeTool tool = new WriteCodeTool(codeContext, environmentManager, codeFastIntentSupport);
+		WriteCodeTool tool = new WriteCodeTool(codeContext, environmentManager);
 
 		return FunctionToolCallback.builder("write_code", tool)
 				.description(WRITE_CODE_DESCRIPTION)
 				.inputType(Request.class)
 				.build();
-	}
-
-	public static ToolCallback createWriteCodeToolCallback(
-			CodeContext codeContext,
-			RuntimeEnvironmentManager environmentManager) {
-		return createWriteCodeToolCallback(codeContext, environmentManager, null);
 	}
 
 	/**
@@ -392,7 +332,5 @@ public class WriteCodeTool implements BiFunction<WriteCodeTool.Request, ToolCont
 			this.parameters = parameters;
 			this.code = code;
 		}
-
 	}
 }
-
